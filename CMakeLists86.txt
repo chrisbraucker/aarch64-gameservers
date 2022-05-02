@@ -481,9 +481,9 @@ set(WRAPPER "${BOX86_ROOT}/src/wrapped/generated/wrapper.c" "${BOX86_ROOT}/src/w
 
 add_custom_command(
     OUTPUT "${BOX86_ROOT}/src/wrapped/generated/functions_list.txt"
-    COMMAND "${PYTHON_EXECUTABLE}" "${BOX86_ROOT}/rebuild_wrappers.py" 
-    "${BOX86_ROOT}" 
-    "PANDORA" "HAVE_LD80BITS" "NOALIGN" "HAVE_TRACE" "POWERPCLE" "ANDROID" "--" 
+    COMMAND "${PYTHON_EXECUTABLE}" "${BOX86_ROOT}/rebuild_wrappers.py"
+    "${BOX86_ROOT}"
+    "PANDORA" "HAVE_LD80BITS" "NOALIGN" "HAVE_TRACE" "POWERPCLE" "ANDROID" "--"
     ${WRAPPEDS_HEAD}
     MAIN_DEPENDENCY "${BOX86_ROOT}/rebuild_wrappers.py"
     DEPENDS ${WRAPPEDS} ${WRAPPEDS_HEAD}
@@ -560,9 +560,9 @@ if(ARM_DYNAREC)
     add_dependencies(arm_pass2 WRAPPERS)
     add_dependencies(arm_pass3 WRAPPERS)
 
-    add_library(dynarec STATIC 
-        $<TARGET_OBJECTS:dynarec_arm> 
-        $<TARGET_OBJECTS:arm_pass0> 
+    add_library(dynarec STATIC
+        $<TARGET_OBJECTS:dynarec_arm>
+        $<TARGET_OBJECTS:arm_pass0>
         $<TARGET_OBJECTS:arm_pass1>
         $<TARGET_OBJECTS:arm_pass2>
         $<TARGET_OBJECTS:arm_pass3>

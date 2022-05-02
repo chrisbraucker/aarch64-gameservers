@@ -30,7 +30,7 @@ endif()
 if(RV64)
     set(LD80BITS OFF CACHE BOOL "")
     set(NOALIGN OFF CACHE BOOL "")
-    set(ARM_DYNAREC OFF CACHE BOOL "")  
+    set(ARM_DYNAREC OFF CACHE BOOL "")
     set(PAGE16K OFF CACHE BOOL "")
 endif()
 if(PPC64LE)
@@ -719,7 +719,7 @@ add_test(sse ${CMAKE_COMMAND} -D TEST_PROGRAM=${CMAKE_BINARY_DIR}/${BOX64}
     -P ${CMAKE_SOURCE_DIR}/runTest.cmake )
 
 set_tests_properties(sse PROPERTIES ENVIRONMENT "BOX64_DYNAREC_FASTNAN=0")
-    
+
 add_test(aes ${CMAKE_COMMAND} -D TEST_PROGRAM=${CMAKE_BINARY_DIR}/${BOX64}
     -D TEST_ARGS=${CMAKE_SOURCE_DIR}/tests/test18 -D TEST_OUTPUT=tmpfile18.txt
     -D TEST_REFERENCE=${CMAKE_SOURCE_DIR}/tests/ref18.txt
