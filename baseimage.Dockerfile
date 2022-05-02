@@ -29,6 +29,7 @@ ARG NUMTHREADS
 ARG BUILDARCH
 
 WORKDIR /src/box86/build
+COPY CMakeLists86.txt ../CMakeLists.txt
 RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make -j${NUMTHREADS:-$(nproc)} \
  && sed -i \
@@ -39,6 +40,7 @@ RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make package
 
 WORKDIR /src/box64/build
+COPY CMakeLists64.txt ../CMakeLists.txt
 RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make -j${NUMTHREADS:-$(nproc)} \
  && sed -i \
