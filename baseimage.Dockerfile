@@ -25,8 +25,11 @@ RUN git clone https://github.com/ptitSeb/box64 \
  && tar xvf steamcmd.tar.gz
 
 ARG NUMTHREADS
+# Defined by the architectures specified in CMakeLists.txt
+ARG BUILDARCH
+
 WORKDIR /src/box86/build
-RUN cmake .. -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make -j${NUMTHREADS:-$(nproc)} \
  && sed -i \
       -e '/CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA/d' \
@@ -36,7 +39,7 @@ RUN cmake .. -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make package
 
 WORKDIR /src/box64/build
-RUN cmake .. -DRPI4ARM64=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make -j${NUMTHREADS:-$(nproc)} \
  && sed -i \
       -e '/CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA/d' \
