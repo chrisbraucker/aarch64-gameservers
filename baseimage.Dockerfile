@@ -17,10 +17,11 @@ RUN apt-get install -y \
       python3 curl \
  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
                         --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
-                        --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+                        --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
+                        --slave /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-10
 
-RUN git clone https://github.com/ptitSeb/box64 \
- && git clone https://github.com/ptitSeb/box86 \
+RUN git clone https://github.com/ptitSeb/box86 \
+ && git clone https://github.com/ptitSeb/box64 \
  && curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" -o steamcmd.tar.gz \
  && tar xvf steamcmd.tar.gz
 
@@ -33,9 +34,7 @@ COPY CMakeLists86.txt ../CMakeLists.txt
 RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make -j${NUMTHREADS:-$(nproc)} \
  && sed -i \
-      -e '/CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA/d' \
       -e 's/CPACK_INSTALL_PREFIX/CPACK_PACKAGING_INSTALL_PREFIX/g' \
-      -e 's/set(CPACK_DEBIAN_FILE_NAME "box86.*\.deb")/set(CPACK_DEBIAN_FILE_NAME "box86.deb")/g' \
     CPackConfig.cmake \
  && make package
 
@@ -46,7 +45,6 @@ RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && sed -i \
       -e '/CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA/d' \
       -e 's/CPACK_INSTALL_PREFIX/CPACK_PACKAGING_INSTALL_PREFIX/g' \
-      -e 's/set(CPACK_DEBIAN_FILE_NAME "box64.*\.deb")/set(CPACK_DEBIAN_FILE_NAME "box64.deb")/g' \
     CPackConfig.cmake \
  && make package
 
