@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.10)
 
 option(PANDORA "Set to ON if targeting an OpenPandora device" ${PANDORA})
 option(PYRA "Set to ON if targeting an OpenPandora device" ${PYRA})
@@ -11,19 +11,22 @@ option(GOA_CLONE "Set to ON if targeting GO Advance clones, like RG351p/v, Gamef
 option(RK3288 "Set to ON if targeting an Rockchip RK3288 based device" ${RK3288})
 option(RK3399 "Set to ON if targeting an Rockchip RK3399 based device" ${RK3399})
 option(ODROIDN2 "Set to ON if targeting an Odroid-N2 device" ${ODROIDN2})
+option(TEGRAX1 "Set to ON if targeting an Tegra X1 (ARM64) based device" ${TEGRAX1})
+option(TEGRAX1ARM32 "Set to ON if targeting an Tegra X1 (ARM32) based device" ${TEGRAX1ARM32})
 option(PHYTIUM "Set to ON if targeting an Phytium (D2000 or FT2000/4) based device" ${PHYTIUM})
 option(GAMESHELL "Set to ON if targeting a GameShell device" ${GAMESHELL})
 option(ODROID "Set to ON if targeting an ODroid device" ${ODROID})
 option(POWER9 "Set to ON if targeting a POWER9 processor" ${POWER9})
 option(SD845 "Set to ON if targeting a Snapragon 845 based device" ${SD845})
 option(A64 "Set to ON if targeting an Allwinner A64 based device" ${A64})
+option(LX2160A "Set to ON if targeting an LX2160A based device" ${LX2160A})
 option(ANDROID "Set to ON if targeting an Android device" ${ANDROID})
 option(USE_CCACHE "Set to ON to use ccache if present in the system" ${USE_CCACHE})
 option(HAVE_TRACE "Set to ON to have Trace ability (needs ZydisInfo library)" ${HAVE_TRACE})
 option(NOLOADADDR "Set to ON to avoid fixing the load address of Box86" ${NO_LOADAADR})
 option(NOGETCLOCK "Set to ON to avoid using clock_gettime with CLOCK_MONOTONIC_COARSE for RDTSC opcode (use gltimeofday instead)" ${NOGETCLOCK})
 option(NOGIT "Set to ON if not building from a git clone repo (like when building from a zip download from github)" ${NOGIT})
-if(PANDORA OR PYRA OR RPI2 OR RPI3 OR RPI4 OR GAMESHELL OR ODROID OR GOA_CLONE OR RK3288 OR RK3399 OR ODROIDN2 OR RPI4ARM64 OR PHYTIUM OR SD845 OR A64 OR NEOVERSE)
+if(PANDORA OR PYRA OR RPI2 OR RPI3 OR RPI4 OR GAMESHELL OR ODROID OR GOA_CLONE OR RK3288 OR RK3399 OR ODROIDN2 OR TEGRAX1 OR TEGRAX1ARM32 OR RPI4ARM64 OR PHYTIUM OR SD845 OR A64 OR LX2160A OR NEOVERSE)
     set(LD80BITS OFF CACHE BOOL "")
     set(NOALIGN OFF CACHE BOOL "")
     set(ARM_DYNAREC ON CACHE BOOL "")
@@ -59,7 +62,7 @@ string(COMPARE EQUAL "${CMAKE_HOST_SYSTEM_PROCESSOR}" "x86_64"  _x86_64)
 string(COMPARE EQUAL "${CMAKE_HOST_SYSTEM_PROCESSOR}" "aarch64"  _aarch64)
 string(COMPARE EQUAL "${CMAKE_HOST_SYSTEM_PROCESSOR}" "armhf"  _armhf)
 
-if(_aarch64 AND (RK3399 OR ODROIDN2 OR RPI4ARM64 OR PHYTIUM OR SD845 OR A64 OR NEOVERSE))
+if(_aarch64 AND (RK3399 OR ODROIDN2 OR TEGRAX1 OR RPI4ARM64 OR PHYTIUM OR SD845 OR A64 OR LX2160A OR NEOVERSE))
     set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
     #set(CMAKE_ASM_COMPILER arm-linux-gnueabihf-as) #will use gcc in fact
     set(CMAKE_C_COMPILER_TARGET arm-linux-gnueabihf)
@@ -139,10 +142,22 @@ elseif(ODROIDN2)
     add_definitions(-DODROIDN2)
     add_definitions(-pipe -march=armv8-a+crc+simd+crypto -mcpu=cortex-a73.cortex-a53+crypto -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard)
     set(CMAKE_ASM_FLAGS  "-pipe -march=armv8-a+crc+simd+crypto -mcpu=cortex-a73.cortex-a53+crypto -mfpu=crypto-neon-fp-armv8 -mfloat-abi=hard")
+elseif(TEGRAX1)
+    add_definitions(-DTEGRAX1)
+    add_definitions(-marm -pipe -march=armv8-a+crc -mcpu=cortex-a57 -mfpu=neon-fp-armv8 -mfloat-abi=hard)
+    set(CMAKE_ASM_FLAGS  "-marm -pipe -march=armv8-a+crc -mcpu=cortex-a57 -mfpu=neon-fp-armv8 -mfloat-abi=hard")
+elseif(TEGRAX1ARM32)
+    add_definitions(-DTEGRAX1ARM32)
+    add_definitions(-marm -pipe -march=armv8-a+crc -mcpu=cortex-a57 -mfpu=neon-fp-armv8 -mfloat-abi=hard)
+    set(CMAKE_ASM_FLAGS  "-marm -pipe -march=armv8-a+crc -mcpu=cortex-a57 -mfpu=neon-fp-armv8 -mfloat-abi=hard")
 elseif(PHYTIUM)
     add_definitions(-DPHYTIUM)
     add_definitions(-pipe -march=armv8.1-a+simd+crypto -mfpu=neon-fp-armv8 -mfloat-abi=hard)
     set(CMAKE_ASM_FLAGS  "-pipe -march=armv8.1-a+simd+crypto -mfpu=neon-fp-armv8 -mfloat-abi=hard")
+elseif(LX2160A)
+    add_definitions(-DLX2160A)
+    add_definitions(-pipe -march=armv8-a+crypto+crc -mcpu=cortex-a72+crypto -mfpu=neon-fp-armv8 -mfloat-abi=hard)
+    set(CMAKE_ASM_FLAGS  "-pipe -march=armv8-a+crypto+crc -mcpu=cortex-a72+crypto -mfpu=neon-fp-armv8 -mfloat-abi=hard")
 elseif(ANDROID)
     add_definitions(-DANDROID)
 elseif(ARM_DYNAREC)
@@ -400,6 +415,7 @@ set(WRAPPEDS
     "${BOX86_ROOT}/src/wrapped/wrappeddbusmenugtk.c"
     "${BOX86_ROOT}/src/wrapped/wrappeddbusmenuglib.c"
     "${BOX86_ROOT}/src/wrapped/wrappedappindicator.c"
+    "${BOX86_ROOT}/src/wrapped/wrappedappindicator3.c"
     "${BOX86_ROOT}/src/wrapped/wrappedatk.c"
     "${BOX86_ROOT}/src/wrapped/wrappedatkbridge.c"
     "${BOX86_ROOT}/src/wrapped/wrappedpangoft2.c"
@@ -447,6 +463,8 @@ set(WRAPPEDS
     "${BOX86_ROOT}/src/wrapped/wrappedlibvkd3d.c"
     "${BOX86_ROOT}/src/wrapped/wrappedgomp.c"
     "${BOX86_ROOT}/src/wrapped/wrappedcap.c"
+    "${BOX86_ROOT}/src/wrapped/wrappedpcap.c"
+    "${BOX86_ROOT}/src/wrapped/wrappedfaudio.c"
 )
 if(ANDROID)
     list(APPEND WRAPPEDS
