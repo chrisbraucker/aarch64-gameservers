@@ -20,10 +20,12 @@ RUN apt-get install -y \
                         --slave /usr/bin/gcov gcov /usr/bin/gcov-10 \
                         --slave /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-10
 
+# we download steamcmd with all other deps since it auto-updates
 RUN git clone https://github.com/ptitSeb/box86 \
  && git clone https://github.com/ptitSeb/box64 \
  && curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" -o steamcmd.tar.gz \
- && tar xvf steamcmd.tar.gz
+ && mkdir -p steamcmd/ \
+ && tar xvf steamcmd.tar.gz -C steamcmd/
 
 ARG NUMTHREADS
 # Defined by the architectures specified in CMakeLists.txt
