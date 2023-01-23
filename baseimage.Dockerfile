@@ -42,7 +42,7 @@ RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     CPackConfig.cmake \
  && make package
 
-ARG BOX64_VERSION="v0.1.8"
+ARG BOX64_VERSION="v0.2.0"
 WORKDIR /src/box64/build
 RUN git checkout ${BOX64_VERSION}
 COPY CMakeLists64.txt ../CMakeLists.txt
