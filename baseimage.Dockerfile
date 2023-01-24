@@ -58,7 +58,7 @@ RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 FROM dependencies
 
 WORKDIR /tmp
-COPY --from=builder /src/box64/build/box64.deb /src/box86/build/box86.deb ./
+COPY --from=builder /src/box64/build/box64*.deb /src/box86/build/box86*.deb ./
 RUN dpkg -i *.deb \
  && rm -rf *
 
