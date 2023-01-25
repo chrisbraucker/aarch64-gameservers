@@ -82,6 +82,7 @@ endif()
 if(PANDORA)
     add_definitions(-DPANDORA)
     #add_definitions(-mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -ftree-vectorize -fsingle-precision-constant -ffast-math)
+    set(CMAKE_ASM_FLAGS  "-marm -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp")
 elseif(GAMESHELL)
     add_definitions(-DGAMESHELL)
     add_definitions(-marm -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard)
@@ -257,6 +258,7 @@ set(ELFLOADER_SRC
     "${BOX86_ROOT}/src/box86context.c"
     "${BOX86_ROOT}/src/build_info.c"
     "${BOX86_ROOT}/src/custommem.c"
+    "${BOX86_ROOT}/src/mallochook.c"
     "${BOX86_ROOT}/src/tools/bridge.c"
     "${BOX86_ROOT}/src/tools/pathcoll.c"
     "${BOX86_ROOT}/src/tools/fileutils.c"
@@ -264,6 +266,7 @@ set(ELFLOADER_SRC
     "${BOX86_ROOT}/src/tools/box86stack.c"
     "${BOX86_ROOT}/src/tools/my_cpuid.c"
     "${BOX86_ROOT}/src/tools/gtkclass.c"
+    "${BOX86_ROOT}/src/tools/rcfile.c"
     "${BOX86_ROOT}/src/tools/wine_tools.c"
     "${BOX86_ROOT}/src/elfs/elfloader.c"
     "${BOX86_ROOT}/src/elfs/elfparser.c"
@@ -422,6 +425,7 @@ set(WRAPPEDS
     "${BOX86_ROOT}/src/wrapped/wrappedpangocairo.c"
     "${BOX86_ROOT}/src/wrapped/wrappedgthread2.c"
     "${BOX86_ROOT}/src/wrapped/wrappedcairo.c"
+    "${BOX86_ROOT}/src/wrapped/wrappedcairogobject.c"
     "${BOX86_ROOT}/src/wrapped/wrappedpango.c"
     "${BOX86_ROOT}/src/wrapped/wrappeddbusglib1.c"
     "${BOX86_ROOT}/src/wrapped/wrappedgudev1.c"
@@ -465,6 +469,7 @@ set(WRAPPEDS
     "${BOX86_ROOT}/src/wrapped/wrappedcap.c"
     "${BOX86_ROOT}/src/wrapped/wrappedpcap.c"
     "${BOX86_ROOT}/src/wrapped/wrappedfaudio.c"
+    "${BOX86_ROOT}/src/wrapped/wrappedtbbmallocproxy.c"
 )
 if(ANDROID)
     list(APPEND WRAPPEDS
@@ -492,9 +497,9 @@ set(WRAPPER "${BOX86_ROOT}/src/wrapped/generated/wrapper.c" "${BOX86_ROOT}/src/w
 
 add_custom_command(
     OUTPUT "${BOX86_ROOT}/src/wrapped/generated/functions_list.txt"
-    COMMAND "${PYTHON_EXECUTABLE}" "${BOX86_ROOT}/rebuild_wrappers.py"
-    "${BOX86_ROOT}"
-    "PANDORA" "HAVE_LD80BITS" "NOALIGN" "HAVE_TRACE" "POWERPCLE" "ANDROID" "--"
+    COMMAND "${PYTHON_EXECUTABLE}" "${BOX86_ROOT}/rebuild_wrappers.py" 
+    "${BOX86_ROOT}" 
+    "PANDORA" "HAVE_LD80BITS" "NOALIGN" "HAVE_TRACE" "POWERPCLE" "ANDROID" "--" 
     ${WRAPPEDS_HEAD}
     MAIN_DEPENDENCY "${BOX86_ROOT}/rebuild_wrappers.py"
     DEPENDS ${WRAPPEDS} ${WRAPPEDS_HEAD}
@@ -571,9 +576,9 @@ if(ARM_DYNAREC)
     add_dependencies(arm_pass2 WRAPPERS)
     add_dependencies(arm_pass3 WRAPPERS)
 
-    add_library(dynarec STATIC
-        $<TARGET_OBJECTS:dynarec_arm>
-        $<TARGET_OBJECTS:arm_pass0>
+    add_library(dynarec STATIC 
+        $<TARGET_OBJECTS:dynarec_arm> 
+        $<TARGET_OBJECTS:arm_pass0> 
         $<TARGET_OBJECTS:arm_pass1>
         $<TARGET_OBJECTS:arm_pass2>
         $<TARGET_OBJECTS:arm_pass3>
@@ -658,6 +663,7 @@ if(NOT _x86 AND NOT _x86_64)
   install(FILES ${CMAKE_SOURCE_DIR}/x86lib/libstdc++.so.5 DESTINATION /usr/lib/i386-linux-gnu/)
   install(FILES ${CMAKE_SOURCE_DIR}/x86lib/libgcc_s.so.1 DESTINATION /usr/lib/i386-linux-gnu/)
   install(FILES ${CMAKE_SOURCE_DIR}/x86lib/libpng12.so.0 DESTINATION /usr/lib/i386-linux-gnu/)
+  install(FILES ${CMAKE_SOURCE_DIR}/system/box86.box86rc DESTINATION /etc/)
 endif()
 
 if(NOT TARGET uninstall)
@@ -697,7 +703,7 @@ else()
     #probably wrong...
     execute_process(COMMAND "dpkg --print-architecture" OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 endif()
-set(CPACK_DEBIAN_FILE_NAME "${BOX86}.deb")
+set(CPACK_DEBIAN_FILE_NAME "${BOX86}-${BOX86_MAJOR}.${BOX86_MINOR}.${BOX86_REVISION}_Linux-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
 INCLUDE(CPack)
 
 add_test(NAME bootSyscall COMMAND ${CMAKE_COMMAND} -D TEST_PROGRAM=${CMAKE_BINARY_DIR}/${BOX86} 

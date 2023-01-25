@@ -1,4 +1,4 @@
-FROM debian:11.3-slim as dependencies
+FROM debian:11.6-slim as dependencies
 
 RUN dpkg --add-architecture armhf \
  && apt-get update && apt-get dist-upgrade -y \
@@ -31,7 +31,7 @@ ARG NUMTHREADS
 # Defined by the architectures specified in CMakeLists.txt
 ARG BUILDARCH
 
-ARG BOX86_VERSION="369aa14bff1"
+ARG BOX86_VERSION="8e88ca6985b"
 WORKDIR /src/box86/build
 RUN git checkout ${BOX86_VERSION}
 COPY CMakeLists86.txt ../CMakeLists.txt
@@ -58,7 +58,7 @@ RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 FROM dependencies
 
 WORKDIR /tmp
-COPY --from=builder /src/box64/build/box64.deb /src/box86/build/box86.deb ./
+COPY --from=builder /src/box64/build/box64*.deb /src/box86/build/box86*.deb ./
 RUN dpkg -i *.deb \
  && rm -rf *
 
