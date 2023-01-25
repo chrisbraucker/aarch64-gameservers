@@ -5,6 +5,7 @@ cmake_policy(SET CMP0065 NEW)
 SET(CMAKE_C_FLAGS_DEBUG  "-O0 -g")
 SET(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
 
+option(RPI3ARM64 "Set to ON if targeting an RaspberryPI3 device with multiarch arm64 and armhf" ${RPI3ARM64})
 option(RPI4ARM64 "Set to ON if targeting an RaspberryPI4 device with multiarch arm64 and armhf" ${RPI4ARM64})
 option(NEOVERSE "Set to ON if targeting a Neoverse aarch64 device" ${NEOVERSE})
 option(RK3326 "Set to ON if targeting an Rockchip RK3326 based device" ${RK3326})
@@ -41,12 +42,12 @@ if(PPC64LE)
     set(ARM_DYNAREC OFF CACHE BOOL "")
     set(PAGE16K OFF CACHE BOOL "")
 endif()
-if(RK3399 OR ODROIDN2 OR RPI4ARM64 OR RK3326 OR TEGRAX1 OR PHYTIUM OR SD845 OR LX2160A OR M1 OR NEOVERSE)
+if(RK3399 OR ODROIDN2 OR RPI3ARM64 OR RPI4ARM64 OR RK3326 OR TEGRAX1 OR PHYTIUM OR SD845 OR LX2160A OR M1 OR NEOVERSE)
     set(LD80BITS OFF CACHE BOOL "")
     set(NOALIGN OFF CACHE BOOL "")
     set(ARM_DYNAREC ON CACHE BOOL "")
 endif()
-if(RK3399 OR ODROIDN2 OR RPI4ARM64 OR RK3326 OR TEGRAX1 OR PHYTIUM OR SD845 OR LX2160A OR NEOVERSE)
+if(RK3399 OR ODROIDN2 OR RPI3ARM64 OR RPI4ARM64 OR RK3326 OR TEGRAX1 OR PHYTIUM OR SD845 OR LX2160A OR NEOVERSE)
     set(PAGE16K OFF CACHE BOOL "")
 endif()
 if(M1 OR LARCH64)
@@ -93,7 +94,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-if(RPI4ARM64)
+if(RPI3ARM64)
+    add_definitions(-DRPI)
+    add_definitions(-DRPI3ARM64)
+    add_definitions(-pipe -march=armv8-a+crc -mtune=cortex-a53)
+    set(CMAKE_ASM_FLAGS  "-pipe -march=armv8-a+crc -mtune=cortex-a53")
+elseif(RPI4ARM64)
     add_definitions(-DRPI)
     add_definitions(-DRPI4ARM64)
     add_definitions(-pipe -march=armv8-a+crc -mtune=cortex-a72)
@@ -173,7 +179,7 @@ else()
 endif()
 
 #set(BOX64_ELF_ADDRESS "0x500062800000")  #random load address...
-set(BOX64_ELF_ADDRESS "0x64800000")  #low address
+set(BOX64_ELF_ADDRESS "0x34800000")  #low address
 
 if(LD80BITS)
     add_definitions(-DHAVE_LD80BITS)
@@ -286,6 +292,7 @@ set(ELFLOADER_SRC
     "${BOX64_ROOT}/src/tools/gtkclass.c"
     "${BOX64_ROOT}/src/tools/pathcoll.c"
     "${BOX64_ROOT}/src/tools/fileutils.c"
+    "${BOX64_ROOT}/src/tools/rcfile.c"
     "${BOX64_ROOT}/src/tools/wine_tools.c"
     "${BOX64_ROOT}/src/wrapped/generated/wrapper.c"
 )
@@ -299,6 +306,7 @@ set(WRAPPEDS
     "${BOX64_ROOT}/src/wrapped/wrappedatspi.c"
     "${BOX64_ROOT}/src/wrapped/wrappedbz2.c"
     "${BOX64_ROOT}/src/wrapped/wrappedcairo.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedcairogobject.c"
     "${BOX64_ROOT}/src/wrapped/wrappedcrashhandler.c"
     "${BOX64_ROOT}/src/wrapped/wrappedcrypto.c"
     "${BOX64_ROOT}/src/wrapped/wrappedcurl.c"
@@ -327,6 +335,7 @@ set(WRAPPEDS
     "${BOX64_ROOT}/src/wrapped/wrappedgstapp.c"
     "${BOX64_ROOT}/src/wrapped/wrappedgstaudio.c"
     "${BOX64_ROOT}/src/wrapped/wrappedgstbase.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedgstgl.c"
     "${BOX64_ROOT}/src/wrapped/wrappedgstreamer.c"
     "${BOX64_ROOT}/src/wrapped/wrappedgsttag.c"
     "${BOX64_ROOT}/src/wrapped/wrappedgstvideo.c"
@@ -371,6 +380,7 @@ set(WRAPPEDS
     "${BOX64_ROOT}/src/wrapped/wrappedlibvadrm.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibvawayland.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibvax11.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibvdpau.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibvorbis.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibx11.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibx11xcb.c"
@@ -380,11 +390,18 @@ set(WRAPPEDS
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbdri3.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbglx.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbkeysyms.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxcbicccm.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbimage.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbrandr.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxcbrender.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxcbrenderutil.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbshape.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbshm.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxcbsync.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxcbutil.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxcbxinerama.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbxfixes.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxcbxkb.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcbxtest.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcomposite.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxcursor.c"
@@ -396,6 +413,7 @@ set(WRAPPEDS
     "${BOX64_ROOT}/src/wrapped/wrappedlibxi.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxmu.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxpm.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedlibxpresent.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxrandr.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxrender.c"
     "${BOX64_ROOT}/src/wrapped/wrappedlibxss.c"
@@ -437,6 +455,8 @@ set(WRAPPEDS
     "${BOX64_ROOT}/src/wrapped/wrappedsmime3.c"
     "${BOX64_ROOT}/src/wrapped/wrappedsmpeg2.c"
     "${BOX64_ROOT}/src/wrapped/wrappedssl3.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedtbbmalloc.c"
+    "${BOX64_ROOT}/src/wrapped/wrappedtbbmallocproxy.c"
     "${BOX64_ROOT}/src/wrapped/wrappedtcmallocminimal.c"
     "${BOX64_ROOT}/src/wrapped/wrappedudev0.c"
     "${BOX64_ROOT}/src/wrapped/wrappedudev1.c"
@@ -501,6 +521,7 @@ if(ARM_DYNAREC)
 
         "${BOX64_ROOT}/src/dynarec/arm64/dynarec_arm64_functions.c"
         "${BOX64_ROOT}/src/dynarec/arm64/arm64_printer.c"
+        "${BOX64_ROOT}/src/dynarec/arm64/dynarec_arm64_jmpnext.c"
 
         "${BOX64_ROOT}/src/dynarec/arm64/arm64_prolog.S"
         "${BOX64_ROOT}/src/dynarec/arm64/arm64_epilog.S"
@@ -633,6 +654,7 @@ if(NOT _x86 AND NOT _x86_64)
   install(FILES ${CMAKE_SOURCE_DIR}/x64lib/libstdc++.so.6 DESTINATION /usr/lib/x86_64-linux-gnu/)
   install(FILES ${CMAKE_SOURCE_DIR}/x64lib/libgcc_s.so.1 DESTINATION /usr/lib/x86_64-linux-gnu/)
   install(FILES ${CMAKE_SOURCE_DIR}/x64lib/libpng12.so.0 DESTINATION /usr/lib/x86_64-linux-gnu/)
+  install(FILES ${CMAKE_SOURCE_DIR}/system/box64.box64rc DESTINATION /etc/)
 endif()
 
 if(NOT TARGET uninstall)
@@ -673,7 +695,7 @@ else()
     #probably wrong...
     execute_process(COMMAND "dpkg --print-architecture" OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 endif()
-set(CPACK_DEBIAN_FILE_NAME "${BOX64}.deb")
+set(CPACK_DEBIAN_FILE_NAME "${BOX64}-${BOX64_MAJOR}.${BOX64_MINOR}.${BOX64_REVISION}_Linux-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
 INCLUDE(CPack)
 
 add_test(bootSyscall ${CMAKE_COMMAND} -D TEST_PROGRAM=${CMAKE_BINARY_DIR}/${BOX64}
