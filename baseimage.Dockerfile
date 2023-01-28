@@ -5,7 +5,7 @@ RUN dpkg --add-architecture armhf \
  && apt-get install -y \
       libsdl2-2.0-0 libsdl2-dev \
       libc6 libstdc++6 libncurses6 \
-      libc6:armhf libstdc++6:armhf libncurses6:armhf
+      libsdl2-2.0-0:armhf libc6:armhf libstdc++6:armhf libncurses6:armhf
 
 
 FROM dependencies as builder
@@ -66,4 +66,8 @@ WORKDIR /steamcmd
 COPY --from=builder --chown=root:root /src/steamcmd .
 ENV BOX86_DYNAREC "0"
 ENV DEBUGGER "/usr/local/bin/box86"
+
+# get a steamcmd MVP going for libraries and such
+RUN /steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType linux +login anonymous +quit
+
 CMD [ "/steamcmd/steamcmd.sh" ]
