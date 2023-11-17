@@ -1,0 +1,3 @@
+[submodule "satisfactory/wolveix"]
+	path = satisfactory/wolveix
+	url = https://github.com/wolveix/satisfactory-server
