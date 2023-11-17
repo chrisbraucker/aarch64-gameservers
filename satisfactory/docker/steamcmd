@@ -1,0 +1,3 @@
+#!/bin/bash -
+
+exec "/steamcmd/steamcmd.sh" "$@"

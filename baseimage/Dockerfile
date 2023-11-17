@@ -4,7 +4,7 @@ RUN dpkg --add-architecture armhf \
  && apt-get update && apt-get dist-upgrade -y \
  && apt-get install -y \
       libsdl2-2.0-0 libsdl2-dev \
-      libc6 libstdc++6 libncurses6 \
+      libc6 libstdc++6 libncurses6 \    
       libsdl2-2.0-0:armhf libc6:armhf libstdc++6:armhf libncurses6:armhf
 
 
@@ -13,7 +13,7 @@ FROM dependencies as builder
 WORKDIR /src
 RUN apt-get install -y \
       git build-essential cmake \
-      gcc-10 gcc-10 g++-10 cpp-10 gcc-10-arm-linux-gnueabihf \
+      gcc-10 g++-10 cpp-10 gcc-10-arm-linux-gnueabihf \
       python3 curl \
  && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
                         --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
