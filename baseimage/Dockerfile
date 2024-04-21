@@ -29,13 +29,13 @@ RUN git clone https://github.com/ptitSeb/box86 \
 
 ARG NUMTHREADS
 # Defined by the architectures specified in CMakeLists.txt
-ARG BUILDARCH
+ARG MAKEARCH
 
 ARG BOX86_VERSION="v0.2.6"
 WORKDIR /src/box86/build
 RUN git checkout ${BOX86_VERSION}
 COPY CMakeLists86.txt ../CMakeLists.txt
-RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+RUN cmake .. -D${MAKEARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make -j${NUMTHREADS:-$(nproc)} \
  && sed -i \
       -e 's/CPACK_INSTALL_PREFIX/CPACK_PACKAGING_INSTALL_PREFIX/g' \
@@ -46,7 +46,7 @@ ARG BOX64_VERSION="v0.1.8"
 WORKDIR /src/box64/build
 RUN git checkout ${BOX64_VERSION}
 COPY CMakeLists64.txt ../CMakeLists.txt
-RUN cmake .. -D${BUILDARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+RUN cmake .. -D${MAKEARCH:-RPI4ARM64}=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  && make -j${NUMTHREADS:-$(nproc)} \
  && sed -i \
       -e '/CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA/d' \
